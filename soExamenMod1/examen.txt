@@ -1,0 +1,240 @@
+Nombre: Carlos
+Apellidos: Sánchez Páez
+Grupo: 2A (A2)
+DNI: --------------
+	
+							MÓDULO 1. SISTEMAS OPERATIVOS
+Ejercicio 1
+	1.- Creamos los usuarios
+		[root@localhost ~]# useradd usuario1
+		[root@localhost ~]# useradd usuario2
+		[root@localhost ~]# useradd usuario3
+	2.- Comprobamos que se han creado sus directorios de trabajo
+	[root@localhost ~]# ls /home
+		usuario1  usuario2  usuario3
+	3.- Creamos los directorios y archivos correspondientes
+		[root@localhost home]# mkdir usuario1/directorioUsuario1 && touch usuario1/directorioUsuario1/datosUsuario1
+		[root@localhost home]# mkdir usuario2/directorioUsuario2 && touch usuario2/directorioUsuario2/datosUsuario2
+		[root@localhost home]# mkdir usuario3/directorioUsuario3 && touch usuario3/directorioUsuario3/datosUsuario3
+	4.- Comprobamos que efectivamente se han creado
+		[root@localhost home]# ls -lR
+		.:
+		total 12
+		drwx------ 3 usuario1 usuario1 4096 Oct 26 05:49 usuario1
+		drwx------ 3 usuario2 usuario2 4096 Oct 26 05:50 usuario2
+		drwx------ 3 usuario3 usuario3 4096 Oct 26 05:50 usuario3
+
+		./usuario1:
+		total 4
+		drwxr-xr-x 2 root root 4096 Oct 26 05:49 directorioUsuario1
+
+		./usuario1/directorioUsuario1:
+		total 0
+		-rw-r--r-- 1 root root 0 Oct 26 05:49 datosUsuario1
+
+		./usuario2:
+		total 4
+		drwxr-xr-x 2 root root 4096 Oct 26 05:50 directorioUsuario2
+
+		./usuario2/directorioUsuario2:
+		total 0
+		-rw-r--r-- 1 root root 0 Oct 26 05:50 datosUsuario2
+
+		./usuario3:
+		total 4
+		drwxr-xr-x 2 root root 4096 Oct 26 05:50 directorioUsuario3
+
+		./usuario3/directorioUsuario3:
+		total 0
+		-rw-r--r-- 1 root root 0 Oct 26 05:50 datosUsuario3
+
+	5.- Para establecer los permisos del archivo datosUsuario1 necesitamos crear un grupo que contenga al resto de usuarios.
+		[root@localhost home]# groupadd grupoDatosUsuario1
+	6.- Añadimos los usuarios al grupo.
+		[root@localhost home]# gpasswd -a usuario1 grupoDatosUsuario1
+		Adding user usuario1 to group grupoDatosUsuario1
+		[root@localhost home]# gpasswd -a usuario2 grupoDatosUsuario1
+		Adding user usuario2 to group grupoDatosUsuario1
+		[root@localhost home]# gpasswd -a usuario3 grupoDatosUsuario1
+		Adding user usuario3 to group grupoDatosUsuario1
+	7.- Comprobamos que se ha realizado correctamente.
+		[root@localhost home]# cat /etc/group | grep grupoDatosUsuario1
+		grupoDatosUsuario1:x:503:usuario1,usuario2,usuario3
+	8.- Establecemos los permisos de datosUsuario1. Primero, vemos los permisos que tiene actualmente.
+		[root@localhost home]# ls -l usuario1/directorioUsuario1/
+		total 0
+		-rw-r--r-- 1 root root 0 Oct 26 05:49 datosUsuario1
+	9.- Configuramos los permisos
+		[root@localhost home]# chmod u+x usuario1/directorioUsuario1/datosUsuario1 #Ejecución para el propietario.
+		[root@localhost home]# chmod g+x usuario1/directorioUsuario1/datosUsuario1 #Ejecución para el grupo.
+		[root@localhost home]# chmod o-r usuario1/directorioUsuario1/datosUsuario1 #Lectura para el resto.
+	10.- Comprobamos que ha funcionado.
+		[root@localhost home]# ls -l usuario1/directorioUsuario1/              
+		total 0
+		-rwxr-x--- 1 root root 0 Oct 26 05:49 datosUsuario1
+	11.- Pasamos al usuario2. Primero creamos un grupo con usuario1 y después comprobamos.
+		[root@localhost home]# groupadd grupoDatosUsuario2
+		[root@localhost home]# gpasswd -a usuario2 grupoDatosUsuario2
+		Adding user usuario2 to group grupoDatosUsuario2
+		[root@localhost home]# gpasswd -a usuario1 grupoDatosUsuario2
+		Adding user usuario1 to group grupoDatosUsuario2
+		[root@localhost home]# cat /etc/group | grep grupoDatosUsuario2
+		grupoDatosUsuario2:x:504:usuario2,usuario1
+	12.- Establecemos los permisos. Para ello, vemos primero los que tiene.
+		[root@localhost home]# cat /etc/group | grep grupoDatosUsuario2
+		grupoDatosUsuario2:x:504:usuario2,usuario1
+
+		[root@localhost home]# ls -l usuario2/directorioUsuario2/              
+		total 0
+		-rw-r--r-- 1 root root 0 Oct 26 05:50 datosUsuario2
+		[root@localhost home]# chmod g+w usuario2/directorioUsuario2/datosUsuario2 #Escritura para el grupo
+		#Vemos los permisos del directorioUsuario2
+		[root@localhost home]# ls -l usuario2/ | grep directorioUsuario2
+		drwxr-xr-x 2 root root 4096 Oct 26 05:50 directorioUsuario2
+		#Establecemos solo lectura para el propietario y desactivamos el resto de permisos.
+		[root@localhost home]# chmod -rwx usuario2/directorioUsuario2/ #Quitamos todos los permisos.
+		[root@localhost home]# chmod u+r usuario2/directorioUsuario2/  #Lectura para el propietario.
+		#Comprobamos
+		[root@localhost home]# ls -l usuario2/ | grep directorioUsuario2
+		dr-------- 2 root root 4096 Oct 26 05:50 directorioUsuario2
+	13.- Pasamos al usuario3. Primero creamos un grupo con los usuarios 1 y 2.
+		[root@localhost home]# groupadd grupoDatosUsuario3
+		[root@localhost home]# gpasswd -a usuario3 grupoDatosUsuario3
+		Adding user usuario3 to group grupoDatosUsuario3
+		[root@localhost home]# gpasswd -a usuario2 grupoDatosUsuario3
+		Adding user usuario2 to group grupoDatosUsuario3
+		[root@localhost home]# gpasswd -a usuario1 grupoDatosUsuario3
+		Adding user usuario1 to group grupoDatosUsuario3
+		[root@localhost home]# cat /etc/group | grep grupoDatosUsuario3
+		grupoDatosUsuario3:x:505:usuario3,usuario2,usuario1
+	14.- Establecemos los permisos. Primero, comprobamos los que ya tiene.
+		[root@localhost home]# ls -l usuario3/directorioUsuario3/
+		total 0
+		-rw-r--r-- 1 root root 0 Oct 26 05:50 datosUsuario3
+		[root@localhost home]# chmod g+w usuario3/directorioUsuario3/datosUsuario3 #Escritura para el grupo.
+		#Comprobamos
+		[root@localhost home]# ls -l usuario3/directorioUsuario3/
+		total 0
+		-rw-rw-r-- 1 root root 0 Oct 26 05:50 datosUsuario3
+Ejercicio 2
+
+	1.- Vamos a crear un dispositivo loop para trabajar con él. Será de 20MB y formato ext4.
+		[root@localhost home]# mknod /dev/loop b 7 0
+		[root@localhost home]# dd if=/dev/zero of=/root/sistemaLoop bs=2k count=10000
+		10000+0 records in
+		10000+0 records out
+		20480000 bytes (20 MB) copied, 0.301094 s, 68.0 MB/s
+		[root@localhost home]# losetup /dev/loop /root/sistemaLoop 
+		[root@localhost home]# mkdir /mnt/montajeLoop
+		[root@localhost home]# mke2fs -t ext4 /dev/loop
+			mke2fs 1.41.12 (17-May-2010)
+			Filesystem label=
+			OS type: Linux
+			Block size=1024 (log=0)
+			Fragment size=1024 (log=0)
+			Stride=0 blocks, Stripe width=0 blocks
+			5016 inodes, 20000 blocks
+			1000 blocks (5.00%) reserved for the super user
+			First data block=1
+			Maximum filesystem blocks=20709376
+			3 block groups
+			8192 blocks per group, 8192 fragments per group
+			1672 inodes per group
+			Superblock backups stored on blocks: 
+				8193
+
+			Writing inode tables: done                            
+			Creating journal (1024 blocks): done
+			Writing superblocks and filesystem accounting information: done
+
+			This filesystem will be automatically checked every 37 mounts or
+			180 days, whichever comes first.  Use tune2fs -c or -i to override.
+		[root@localhost home]# tune2fs -L 'Dispositivo loop' /dev/loop
+
+	2.- Ahora, modificaremos /etc/fstab para ajustar nuestro SA a los parámetros del ejercicio.
+		[root@localhost home]# vi /etc/fstab
+		#Añadimos la siguiente línea
+			/dev/loop                               /mnt/montajeLoop        ext4    rw,usrquota     0 0
+	3.- Instalamos el paquete de cuotas.
+		[root@localhost home]# mkdir /mnt/anfitrion
+		[root@localhost home]# mount none /mnt/anfitrion/ -t hostfs -o /fenix/depar/lsi/so/paquetes
+		[root@localhost home]# rpm -i /mnt/anfitrion/libnl-1.1-12.fc14.i686.rpm  
+		[root@localhost home]# rpm -i /mnt/anfitrion/tcp_wrappers-7.6-59.fc14.i686.rpm 
+		[root@localhost home]# rpm -i /mnt/anfitrion/quota-3.17-13.fc14.i686.rpm 
+	4.- Montamos el dispositivo.
+		[root@localhost home]# mount -a
+		[ 3298.810000] EXT4-fs (loop0): mounted filesystem with ordered data mode. Opts: usrquota
+	5.- Creamos el archivo de cuotas
+		[root@localhost home]# quotacheck -nm /mnt/montajeLoop/
+		quotacheck: Error checking device name: LABEL=ROOT
+		quotacheck: Cannot get device name for LABEL=ROOT
+
+		### Aquí da un error. Aunque comente la línea LABEL=ROOT (vino a mi sitio y lo hicimos), sigue dando el mismo error. En cualquier caso, los pasos siguientes serían:
+
+		[root@localhost home]# quotaon -a
+		quotaon: Error checking device name: LABEL=ROOT
+		quotaon: Cannot get device name for LABEL=ROOT
+		[root@localhost home]# edquota usuario1
+		#Y así con todos los usuarios
+		[root@localhost home]# edquota -t #Establecer el período para el límite soft.
+	6.- Para establecer los tiempos en los que se monta el dispositivo, usaremos el demonio cron. Primero, editamos el archivo y establecemos estas líneas:
+		[root@localhost home]# crontab -u root -e
+			00 8 * * 6 mount -o rw /dev/loop /mnt/montajeLoop  #Montar el SA el sábado a las 800
+			00 14 * * 6  umount /mnt/montajeLoop    #Desmontar el sistema de archivos el sábado a las 14:00
+			00 8 * * 1-5 mount -o ro /dev/loop /mnt/montajeLoop #Montar el sistema de lunes a viernes a las 8:00
+			00 22 * * 1-5 umount /mnt/montajeLoop    #Desmontar el sistema de archivos de lunes a viernes a las 22:00
+	7.- Comprobamos que ha funcionado
+		[root@localhost home]# crontab -l
+			00 8 * * 6 mount -o rw /dev/loop /mnt/montajeLoop  #Montar el SA el sábado a las 800
+			00 14 * * 6  umount /mnt/montajeLoop 	#Desmontar el sistema de archivos el sábado a las 14:00
+			00 8 * * 1-5 mount -o ro /dev/loop /mnt/montajeLoop #Montar el sistema de lunes a viernes a las 8:00
+			00 22 * * 1-5 umount /mnt/montajeLoop    #Desmontar el sistema de archivos de lunes a viernes a las 22:00
+
+Ejercicio 3
+	
+	Para este ejercicio, crearé un programa en C++ que pida la entrada de un dato. Después, ejecutaré la orden time y tardaré 2 y 5 segundos en introducir el dato.
+	Así, podremos comprobar si el Tiempo Real incluye el que pasa el proceso bloqueado.
+	El programa es el siguiente:
+
+	#include <iostream>
+	using namespace std;
+	int main(){
+		cout<<"Introduce"<<endl;
+		char valor;
+		cin>>valor;
+	}
+
+	Compilamos y ejecutamos:
+		#Tardo dos segundos
+
+		csp98@ei142080:~/Escritorio$ g++ -o programa prueba.cpp
+		csp98@ei142080:~/Escritorio$ time ./programa 
+		Introduce
+		a
+
+		real	0m2.520s
+		user	0m0.000s
+		sys	0m0.000s
+	
+		#Tardo 5 segundos
+		csp98@ei142080:~/Escritorio$ time ./programa 
+		Introduce
+		a
+
+		real	0m5.232s
+		user	0m0.000s
+		sys	0m0.000s
+Por tanto, podemos concluir que el tiempo real incluye al que el proceso pasa en estado bloqueado.
+
+		
+
+
+
+
+
+
+		
+
+
+
+		
